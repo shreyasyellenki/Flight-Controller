@@ -1,19 +1,16 @@
+#include "Telemetry.hpp"
 #include "SharedData.hpp"
-#include <iostream>
 #include <thread>
 #include <chrono>
+#include <iostream>
 
-void telemetryThread() {
+void telemetryThread(MessageQueue<ControlCommand>& commandQueue) {
     while (running) {
-        SensorData dataCopy;
-        {
-            std::lock_guard<std::mutex> lock(dataMutex);
-            dataCopy = sensorData;
-        }
+        ControlCommand cmd = commandQueue.pop();
 
-        std::cout << "[TEL] Pitch: " << dataCopy.pitch
-                  << " Roll: " << dataCopy.roll
-                  << " Yaw: " << dataCopy.yaw << "\n";
+        std::cout << "[TEL] PitchCmd: " << cmd.pitchCmd
+                  << " RollCmd: " << cmd.rollCmd
+                  << " YawCmd: " << cmd.yawCmd << "\n";
 
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }

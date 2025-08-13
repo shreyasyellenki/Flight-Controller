@@ -1,2 +1,5 @@
 #pragma once
-void sensorThread();
+#include "MessageQueue.hpp"
+#include "Messages.hpp"
+
+void sensorThread(MessageQueue<SensorMessage>& sensorQueue);

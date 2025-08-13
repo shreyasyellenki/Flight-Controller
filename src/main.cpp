@@ -7,16 +7,17 @@
 #include <chrono>
 
 int main() {
-    std::thread t1(sensorThread);
-    std::thread t2(controlThread);
-    std::thread t3(telemetryThread);
+    MessageQueue<SensorMessage> sensorQueue;
+    MessageQueue<ControlCommand> commandQueue;
 
-    std::this_thread::sleep_for(std::chrono::seconds(5)); // Run for 5 seconds
+    std::thread t1(sensorThread, std::ref(sensorQueue));
+    std::thread t2(controlThread, std::ref(sensorQueue), std::ref(commandQueue));
+    std::thread t3(telemetryThread, std::ref(commandQueue));
+
+    std::this_thread::sleep_for(std::chrono::seconds(5)); 
     running = false;
 
     t1.join();
     t2.join();
     t3.join();
-
-    return 0;
 }

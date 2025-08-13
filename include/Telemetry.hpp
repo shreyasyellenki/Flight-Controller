@@ -1,2 +1,5 @@
 #pragma once
-void telemetryThread();
+#include "MessageQueue.hpp"
+#include "Messages.hpp"
+
+void telemetryThread(MessageQueue<ControlCommand>& commandQueue);

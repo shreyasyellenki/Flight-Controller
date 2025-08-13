@@ -1,2 +1,6 @@
 #pragma once
-void controlThread();
+#include "MessageQueue.hpp"
+#include "Messages.hpp"
+
+void controlThread(MessageQueue<SensorMessage>& sensorQueue,
+                   MessageQueue<ControlCommand>& commandQueue);
