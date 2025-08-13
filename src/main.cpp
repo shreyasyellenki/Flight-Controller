@@ -1,23 +1,32 @@
+#include "Dynamics.hpp"
 #include "Sensor.hpp"
 #include "Control.hpp"
 #include "Telemetry.hpp"
 #include "SharedData.hpp"
-
 #include <thread>
 #include <chrono>
 
 int main() {
-    MessageQueue<SensorMessage> sensorQueue;
-    MessageQueue<ControlCommand> commandQueue;
+    MessageQueue<ControlCommand> commandQueue;         // Control -> Dynamics
+    MessageQueue<StateMessage>   stateForSensorQueue;  // Dynamics -> Sensor
+    MessageQueue<StateMessage>   stateForTelQueue;     // Dynamics -> Telemetry
+    MessageQueue<SensorMessage>  sensorQueue;          // Sensor  -> Control
 
-    std::thread t1(sensorThread, std::ref(sensorQueue));
-    std::thread t2(controlThread, std::ref(sensorQueue), std::ref(commandQueue));
-    std::thread t3(telemetryThread, std::ref(commandQueue));
+    std::thread td(dynamicsThread, std::ref(commandQueue),
+                   std::ref(stateForSensorQueue), std::ref(stateForTelQueue));
+    std::thread ts(sensorThread, std::ref(stateForSensorQueue), std::ref(sensorQueue));
+    std::thread tc(controlThread, std::ref(sensorQueue), std::ref(commandQueue));
+    std::thread tt(telemetryThread, std::ref(stateForTelQueue), std::ref(commandQueue));
 
-    std::this_thread::sleep_for(std::chrono::seconds(5)); 
+    std::this_thread::sleep_for(std::chrono::seconds(8)); // let it fly
     running = false;
 
-    t1.join();
-    t2.join();
-    t3.join();
+    // Close producers to unblock pops
+    commandQueue.close();
+    stateForSensorQueue.close();
+    stateForTelQueue.close();
+    sensorQueue.close();
+
+    td.join(); ts.join(); tc.join(); tt.join();
+    return 0;
 }

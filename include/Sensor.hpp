@@ -2,4 +2,5 @@
 #include "MessageQueue.hpp"
 #include "Messages.hpp"
 
-void sensorThread(MessageQueue<SensorMessage>& sensorQueue);
+void sensorThread(MessageQueue<StateMessage>& stateQueue,
+                  MessageQueue<SensorMessage>& sensorQueue);

@@ -2,4 +2,5 @@
 #include "MessageQueue.hpp"
 #include "Messages.hpp"
 
-void telemetryThread(MessageQueue<ControlCommand>& commandQueue);
+void telemetryThread(MessageQueue<StateMessage>& telemetryStateQueue,
+                     MessageQueue<ControlCommand>& commandQueue);

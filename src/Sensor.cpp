@@ -1,26 +1,27 @@
 #include "Sensor.hpp"
 #include "SharedData.hpp"
 #include <random>
-#include <thread>
 #include <chrono>
-#include <cmath>
+#include <thread>
 
-bool running = true;
-
-void sensorThread(MessageQueue<SensorMessage>& sensorQueue) {
+void sensorThread(MessageQueue<StateMessage>& stateQueue,
+                  MessageQueue<SensorMessage>& sensorQueue) {
     std::default_random_engine gen(std::random_device{}());
-    std::normal_distribution<double> noise(0.0, 0.5);
-    double t = 0.0;
+    std::normal_distribution<double> n_angle(0.0, 0.01); // ~0.57 deg std
 
     while (running) {
-        SensorMessage msg;
-        msg.pitch = 10 * std::sin(t) + noise(gen);
-        msg.roll  = 5 * std::cos(t) + noise(gen);
-        msg.yaw   = fmod(t * 5, 360.0) + noise(gen);
+        auto maybeState = stateQueue.pop();
+        if (!maybeState) break; // queue closed
 
-        sensorQueue.push(msg);
-        t += 0.1;
+        const auto& s = *maybeState;
+        SensorMessage meas{
+            s.roll  + n_angle(gen),
+            s.pitch + n_angle(gen),
+            s.yaw   + n_angle(gen)
+        };
+        sensorQueue.push(meas);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // 20 Hz sensor rate
     }
+    sensorQueue.close();
 }

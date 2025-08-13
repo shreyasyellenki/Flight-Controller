@@ -8,6 +8,7 @@ include_directories(include)
 
 add_executable(flight_controller
     src/main.cpp
+    src/Dynamics.cpp
     src/Sensor.cpp
     src/Control.cpp
     src/Telemetry.cpp
