@@ -18,7 +18,7 @@ int main() {
     std::thread tc(controlThread, std::ref(sensorQueue), std::ref(commandQueue));
     std::thread tt(telemetryThread, std::ref(stateForTelQueue), std::ref(commandQueue));
 
-    std::this_thread::sleep_for(std::chrono::seconds(8)); // let it fly
+    std::this_thread::sleep_for(std::chrono::seconds(8)); 
     running = false;
 
     // Close producers to unblock pops
